@@ -2,6 +2,10 @@ package com.jetbrains.php.tools.quality.phpstan;
 
 import com.intellij.codeInspection.*;
 import com.intellij.codeInspection.ex.ExternalAnnotatorBatchInspection;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.NlsSafe;
@@ -22,6 +26,11 @@ import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 import static com.jetbrains.php.tools.quality.QualityToolAnnotator.updateIfRemoteMappingExists;
 
 public class PhpStanGlobalInspection extends QualityToolValidationGlobalInspection implements ExternalAnnotatorBatchInspection {
+  private static final Logger LOG = Logger.getInstance(PhpStanGlobalInspection.class);
+  
+  // Set to true to show notifications with the PHPStan command for debugging
+  private static final boolean DEBUG_SHOW_COMMAND_NOTIFICATION = false;
+  
   public boolean FULL_PROJECT = false;
   public @NonNls String memoryLimit = "2G";
   public int level = 4;
@@ -55,6 +64,68 @@ public class PhpStanGlobalInspection extends QualityToolValidationGlobalInspecti
   @Override
   protected Key<List<QualityToolXmlMessageProcessor.ProblemDescription>> getKey() {
     return PHPSTAN_ANNOTATOR_INFO;
+  }
+
+  /**
+   * Get command line options for PHPStan editor mode (on-the-fly analysis).
+   * Uses PHPStan's editor mode with --tmp-file and --instead-of for proper ignore handling.
+   * See: https://phpstan.org/user-guide/editor-mode
+   *
+   * @param tmpFilePath      The temporary file path containing the current editor content
+   * @param originalFilePath The original file path in the project
+   * @param project          The current project
+   * @return Command line options for PHPStan
+   */
+  public List<String> getCommandLineOptions(@Nullable String tmpFilePath, @Nullable String originalFilePath, @NotNull Project project) {
+    @NonNls ArrayList<String> options = new ArrayList<>();
+    PhpStanOptionsConfiguration configuration = PhpStanOptionsConfiguration.getInstance(project);
+    options.add("analyze");
+    if (isNotEmpty(configuration.getConfig())) {
+      options.add("-c");
+      options.add(updateIfRemoteMappingExists(configuration.getConfig(), project, PhpStanQualityToolType.INSTANCE));
+    }
+    else {
+      options.add("--level=" + configuration.getLevel());
+    }
+    if (isNotEmpty(configuration.getAutoload())) {
+      options.add("-a");
+      options.add(updateIfRemoteMappingExists(configuration.getAutoload(), project, PhpStanQualityToolType.INSTANCE));
+    }
+    options.add("--memory-limit=" + configuration.getMemoryLimit());
+    options.add("--error-format=checkstyle");
+    options.add("--no-progress");
+    options.add("--no-ansi");
+    options.add("--no-interaction");
+    
+    // PHPStan Editor Mode: use --tmp-file and --instead-of when both paths are available
+    // This ensures ignoreErrors entries work correctly based on the original file path
+    if (isNotEmpty(tmpFilePath) && isNotEmpty(originalFilePath)) {
+      options.add("--tmp-file");
+      options.add(updateIfRemoteMappingExists(tmpFilePath, project, PhpStanQualityToolType.INSTANCE));
+      options.add("--instead-of");
+      options.add(updateIfRemoteMappingExists(originalFilePath, project, PhpStanQualityToolType.INSTANCE));
+      // In editor mode, analyze the original file path (PHPStan uses tmp-file contents instead)
+      options.add(updateIfRemoteMappingExists(originalFilePath, project, PhpStanQualityToolType.INSTANCE));
+    } else if (isNotEmpty(tmpFilePath)) {
+      // Fallback to old behavior if original path is not available
+      options.add(updateIfRemoteMappingExists(tmpFilePath, project, PhpStanQualityToolType.INSTANCE));
+    }
+    
+    // Log the command for debugging
+    String toolPath = PhpStanConfigurationManager.getInstance(project).getLocalSettings().getToolPath();
+    String commandLine = toolPath + " " + String.join(" ", options);
+    LOG.info("PHPStan command: " + commandLine);
+    
+    if (DEBUG_SHOW_COMMAND_NOTIFICATION) {
+      Notifications.Bus.notify(new Notification(
+        "PHPStan",
+        "PHPStan Command",
+        "<html><body style='word-wrap: break-word;'><code>" + commandLine + "</code></body></html>",
+        NotificationType.INFORMATION
+      ), project);
+    }
+    
+    return options;
   }
 
   public List<String> getCommandLineOptions(@NotNull List<String> filePath, @NotNull Project project) {
