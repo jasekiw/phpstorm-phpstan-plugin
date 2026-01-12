@@ -1,0 +1,14 @@
+# Local Gradle properties - copy this file to gradle.properties.local
+# This file should NOT be committed to version control
+
+# Path to your local PHPStorm installation
+# Required for building this plugin as it uses internal PHP plugin APIs
+#
+# Windows:
+platformLocalPath=C:/Users/YourUsername/AppData/Local/Programs/PhpStorm
+# 
+# macOS:
+# platformLocalPath=/Applications/PhpStorm.app/Contents
+#
+# Linux:
+# platformLocalPath=/opt/PhpStorm
