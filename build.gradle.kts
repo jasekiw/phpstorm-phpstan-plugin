@@ -80,7 +80,7 @@ dependencies {
 
 intellijPlatform {
     pluginConfiguration {
-        id = "com.intellij.php.tools.quality.phpstan"
+        id = "com.github.phpstorm-phpstan-plugin"
         name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
         

@@ -1,8 +1,8 @@
-<idea-plugin allow-bundled-update="true">
-  <name>PHPStan Support</name>
-  <id>com.intellij.php.tools.quality.phpstan</id>
-  <description>Plugin provides PHPStan static analysis tool support</description>
-  <vendor>JetBrains</vendor>
+<idea-plugin>
+  <name>PHPStan Support (Custom Build)</name>
+  <id>com.github.phpstorm-phpstan-plugin</id>
+  <description>Plugin provides PHPStan static analysis tool support with editor mode</description>
+  <vendor>Community</vendor>
   <depends>com.jetbrains.php</depends>
   <depends>com.intellij.modules.ultimate</depends>
   <category>PHP Tools</category>
