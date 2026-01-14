@@ -1,6 +1,6 @@
 <idea-plugin>
   <name>PHPStan Support (Custom Build)</name>
-  <id>com.github.phpstorm-phpstan-plugin</id>
+  <id>com.github.jasekiw.phpstan</id>
   <description>Plugin provides PHPStan static analysis tool support with editor mode</description>
   <vendor>Community</vendor>
   <depends>com.jetbrains.php</depends>
@@ -10,45 +10,45 @@
   <depends optional="true" config-file="phpstan-remote-plugin.xml">org.jetbrains.plugins.phpstorm-remote-interpreter</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationService
-        serviceImplementation="com.jetbrains.php.tools.quality.phpstan.PhpStanConfigurationManager$PhpStanAppConfigurationManager"/>
-    <projectService serviceImplementation="com.jetbrains.php.tools.quality.phpstan.PhpStanBlackList"/>
-    <projectService serviceImplementation="com.jetbrains.php.tools.quality.phpstan.PhpStanProjectConfiguration"/>
-    <projectService serviceImplementation="com.jetbrains.php.tools.quality.phpstan.PhpStanOptionsConfiguration"/>
-    <projectService serviceImplementation="com.jetbrains.php.tools.quality.phpstan.PhpStanConfigurationManager"/>
+        serviceImplementation="com.github.jasekiw.phpstan.PhpStanConfigurationManager$PhpStanAppConfigurationManager"/>
+    <projectService serviceImplementation="com.github.jasekiw.phpstan.PhpStanBlackList"/>
+    <projectService serviceImplementation="com.github.jasekiw.phpstan.PhpStanProjectConfiguration"/>
+    <projectService serviceImplementation="com.github.jasekiw.phpstan.PhpStanOptionsConfiguration"/>
+    <projectService serviceImplementation="com.github.jasekiw.phpstan.PhpStanConfigurationManager"/>
     <projectService
-        serviceImplementation="com.jetbrains.php.tools.quality.phpstan.PhpStanConfigurationManager$PhpStanProjectConfigurationManager"/>
+        serviceImplementation="com.github.jasekiw.phpstan.PhpStanConfigurationManager$PhpStanProjectConfigurationManager"/>
     <globalInspection language="PHP" shortName="PhpStanGlobal"
                       groupPath="PHP"
                       groupKey="inspection.php.group.quality.tools"
                       enabledByDefault="false"
                       level="WEAK WARNING"
-                      implementationClass="com.jetbrains.php.tools.quality.phpstan.PhpStanGlobalInspection"
+                      implementationClass="com.github.jasekiw.phpstan.PhpStanGlobalInspection"
                       key="inspection.php.stan.global.display.name" bundle="messages.PhpStanBundle"/>
-    <externalAnnotator language="PHP" implementationClass="com.jetbrains.php.tools.quality.phpstan.PhpStanAnnotatorProxy"/>
-    <postStartupActivity implementation="com.jetbrains.php.tools.quality.phpstan.PhpStanSettingsTransferStartupActivity"/>
-    <projectConfigurable instance="com.jetbrains.php.tools.quality.phpstan.PhpStanConfigurable"
+    <externalAnnotator language="PHP" implementationClass="com.github.jasekiw.phpstan.PhpStanAnnotatorProxy"/>
+    <postStartupActivity implementation="com.github.jasekiw.phpstan.PhpStanSettingsTransferStartupActivity"/>
+    <projectConfigurable instance="com.github.jasekiw.phpstan.PhpStanConfigurable"
                          bundle="messages.PhpStanBundle"
                          key="configurable.quality.tool.phpstan"
                          id="settings.php.quality.tools.phpstan"
                          parentId="settings.php.quality.tools"
                          groupWeight="15"/>
-    <completion.contributor language="PHP" implementationClass="com.jetbrains.php.phpstan.completion.PhpStanCompletionContributor"/>
+    <completion.contributor language="PHP" implementationClass="com.github.jasekiw.phpstan.completion.PhpStanCompletionContributor"/>
   </extensions>
   <extensions defaultExtensionNs="com.jetbrains.php">
-    <composerConfigClient implementation="com.jetbrains.php.tools.quality.phpstan.PhpStanComposerConfig"/>
-    <tools.quality.type implementation="com.jetbrains.php.tools.quality.phpstan.PhpStanQualityToolType"/>
-    <openSettingsProvider implementation="com.jetbrains.php.tools.quality.phpstan.PhpStanOpenSettingsProvider"/>
+    <composerConfigClient implementation="com.github.jasekiw.phpstan.PhpStanComposerConfig"/>
+    <tools.quality.type implementation="com.github.jasekiw.phpstan.PhpStanQualityToolType"/>
+    <openSettingsProvider implementation="com.github.jasekiw.phpstan.PhpStanOpenSettingsProvider"/>
   </extensions>
 
   <extensionPoints>
     <!--suppress PluginXmlValidity -->
-    <extensionPoint qualifiedName="com.jetbrains.php.tools.quality.PhpStan.PhpStanConfigurationProvider"
-                    interface="com.jetbrains.php.tools.quality.phpstan.PhpStanConfigurationProvider"/>
+    <extensionPoint qualifiedName="com.github.jasekiw.phpstan.PhpStanConfigurationProvider"
+                    interface="com.github.jasekiw.phpstan.PhpStanConfigurationProvider"/>
   </extensionPoints>
 
   <actions>
     <action id="PhpStanAddToIgnored"
-            class="com.jetbrains.php.tools.quality.phpstan.PhpStanAddToIgnoredAction">
+            class="com.github.jasekiw.phpstan.PhpStanAddToIgnoredAction">
       <add-to-group group-id="PHPQualityToolsAddToIgnoredList"/>
     </action>
   </actions>

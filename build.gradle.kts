@@ -80,7 +80,7 @@ dependencies {
 
 intellijPlatform {
     pluginConfiguration {
-        id = "com.github.phpstorm-phpstan-plugin"
+        id = "com.github.jasekiw.phpstan"
         name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
         
@@ -113,6 +113,11 @@ tasks {
     }
     
     buildSearchableOptions {
+        enabled = false
+    }
+    
+    // Also disable prepareJarSearchableOptions since buildSearchableOptions is disabled
+    named("prepareJarSearchableOptions") {
         enabled = false
     }
     
