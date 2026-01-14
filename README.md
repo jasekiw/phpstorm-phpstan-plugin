@@ -24,6 +24,13 @@ This plugin adds dedicated functionality for [PHPStan](https://phpstan.org/) to 
 
 This plugin uses internal PHPStorm APIs that are not available through the standard plugin SDK. You **must** have a local PHPStorm installation to build this plugin.
 
+### Setup JDK path
+```ps1
+# in project root
+$env:JAVA_HOME = Join-Path (Get-Location) ".gradle\jdks\jdk-21.0.2"
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+```
+
 ### Step 1: Configure Local PHPStorm Path
 
 Copy the example configuration file:
