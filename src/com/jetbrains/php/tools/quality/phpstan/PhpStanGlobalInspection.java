@@ -67,8 +67,9 @@ public class PhpStanGlobalInspection extends QualityToolValidationGlobalInspecti
   }
 
   /**
-   * Get command line options for PHPStan editor mode (on-the-fly analysis).
-   * Uses PHPStan's editor mode with --tmp-file and --instead-of for proper ignore handling.
+   * Get command line options for PHPStan on-the-fly analysis.
+   * Uses PHPStan's editor mode with --tmp-file and --instead-of for proper ignore handling
+   * when the PHPStan version supports it (1.12.27+, 2.1.17+, or 3.x+).
    * See: https://phpstan.org/user-guide/editor-mode
    *
    * @param tmpFilePath      The temporary file path containing the current editor content
@@ -97,9 +98,25 @@ public class PhpStanGlobalInspection extends QualityToolValidationGlobalInspecti
     options.add("--no-ansi");
     options.add("--no-interaction");
     
+    // Check if the PHPStan version supports editor mode
+    PhpStanConfiguration toolConfiguration = PhpStanConfigurationManager.getInstance(project).getLocalSettings();
+    String version = toolConfiguration.getVersion();
+    
+    // Auto-detect version if not already stored (e.g., after plugin upgrade)
+    if (version == null && isNotEmpty(toolConfiguration.getToolPath())) {
+      version = PhpStanVersionSupport.detectVersion(toolConfiguration.getToolPath());
+      if (version != null) {
+        toolConfiguration.setVersion(version);
+        LOG.info("Auto-detected and stored PHPStan version: " + version);
+      }
+    }
+    
+    boolean supportsEditorMode = PhpStanVersionSupport.supportsEditorMode(version);
+    
     // PHPStan Editor Mode: use --tmp-file and --instead-of when both paths are available
+    // and the PHPStan version supports it (1.12.27+, 2.1.17+, or 3.x+)
     // This ensures ignoreErrors entries work correctly based on the original file path
-    if (isNotEmpty(tmpFilePath) && isNotEmpty(originalFilePath)) {
+    if (supportsEditorMode && isNotEmpty(tmpFilePath) && isNotEmpty(originalFilePath)) {
       options.add("--tmp-file");
       options.add(updateIfRemoteMappingExists(tmpFilePath, project, PhpStanQualityToolType.INSTANCE));
       options.add("--instead-of");
@@ -107,12 +124,12 @@ public class PhpStanGlobalInspection extends QualityToolValidationGlobalInspecti
       // In editor mode, analyze the original file path (PHPStan uses tmp-file contents instead)
       options.add(updateIfRemoteMappingExists(originalFilePath, project, PhpStanQualityToolType.INSTANCE));
     } else if (isNotEmpty(tmpFilePath)) {
-      // Fallback to old behavior if original path is not available
+      // Fallback to old behavior if editor mode not supported or original path not available
       options.add(updateIfRemoteMappingExists(tmpFilePath, project, PhpStanQualityToolType.INSTANCE));
     }
     
     // Log the command for debugging
-    String toolPath = PhpStanConfigurationManager.getInstance(project).getLocalSettings().getToolPath();
+    String toolPath = toolConfiguration.getToolPath();
     String commandLine = toolPath + " " + String.join(" ", options);
     LOG.info("PHPStan command: " + commandLine);
     
